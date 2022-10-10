@@ -17,7 +17,16 @@ library(tidyverse)
 ```{r}
 accel_data = 
   read_csv("./data/accel_data.csv") %>%
-  janitor::clean_names()
+  janitor::clean_names() %>%
+  mutate(day_type = case_when(
+    day == "Saturday" ~ "weekend",
+    day == "Sunday" ~ "weekend",
+    day == "Monday" ~ "weekday",
+    day == "Tuesday" ~ "weekday",
+    day == "Wednesday" ~ "weekday",
+    day == "Thursday" ~ "weekday",
+    day == "Friday" ~ "weekday")) %>% 
+  select(week, day_id, day, day_type, everything())
 ```
 
 
