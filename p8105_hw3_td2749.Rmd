@@ -27,6 +27,9 @@ accel_data =
     day == "Thursday" ~ "weekday",
     day == "Friday" ~ "weekday")) %>% 
   select(week, day_id, day, day_type, everything())
+
+accel_data = mutate(accel_data, total_activity = rowSums(accel_data[5:1444]))
+accel_data = select(accel_data, week, day_id, day, day_type, total_activity, everything())
 ```
 
 
