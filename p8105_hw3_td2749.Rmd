@@ -5,8 +5,9 @@ date: "2022-10-07"
 output: github_document
 ---
 
-```{r Setting up tidyverse}
+```{r Setting up}
 library(tidyverse)
+library(ggplot2)
 ```
 
 
@@ -14,10 +15,46 @@ library(tidyverse)
 
 * Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
-```{r}
+```{r accel_data rowSums version.}
 accel_data = 
   read_csv("./data/accel_data.csv") %>%
   janitor::clean_names() %>%
+  mutate(day_type = ifelse(day == c("Saturday","Sunday"), "weekend", "weekday"))
+
+accel_data = mutate(accel_data, total_activity = rowSums(accel_data[4:1443]))
+accel_data = select(accel_data, week, day_id, day, day_type, total_activity, everything())
+
+table_trial = 
+  accel_data %>% 
+  group_by(week, day) %>% 
+  summarize(total_activity)
+```
+
+
+```{r ASK WHAT'S WRONG WITH THIS}
+accel_data_why =
+  read_csv("./data/accel_data.csv") %>%
+  janitor::clean_names() %>%
+  mutate(day_type = case_when(
+    day == c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") ~ "weekday",
+    day == c("Saturday", "Sunday") ~ "weekend")) %>%
+  select(week, day_id, day, day_type, everything())
+```
+
+
+```{r Plotting attempts}
+accel_data %>%
+  ggplot(aes(x = day, y = total_activity, color = week)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE, fullrange = TRUE)
+```
+
+
+```{r accel_data pivot_long version.}
+accel_data_trial = 
+  read_csv("./data/accel_data.csv") %>%
+  janitor::clean_names() %>%
+  pivot_longer(activity_1:activity_1440, names_to = "activity_minute", values_to = "activity_count") %>% 
   mutate(day_type = case_when(
     day == "Saturday" ~ "weekend",
     day == "Sunday" ~ "weekend",
@@ -26,13 +63,19 @@ accel_data =
     day == "Wednesday" ~ "weekday",
     day == "Thursday" ~ "weekday",
     day == "Friday" ~ "weekday")) %>% 
-  select(week, day_id, day, day_type, everything())
-
-accel_data = mutate(accel_data, total_activity = rowSums(accel_data[5:1444]))
-accel_data = select(accel_data, week, day_id, day, day_type, total_activity, everything())
+  group_by(week, day) %>%
+  mutate(total_activity = sum(activity_count))
 ```
 
-
-* Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+```{r 24 Hour Plot}
+accel_data_trial %>%
+  ggplot(aes(x = activity_minute, y = activity_count, color = day)) +
+  geom_point() 
+```
+     
+* Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent? (TRY TO MAKE LINE GRAPHS)
 
 * Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
+
+
+                                                              
