@@ -5,16 +5,16 @@ date: "2022-10-07"
 output: github_document
 ---
 
-```{r Setting up}
+```{r Setting up, message = FALSE}
 library(tidyverse)
 library(ggplot2)
 ```
 
 ## Problem 2: Accelerometer Data
 
-*Task 2.1*: Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
+**Task 2.1**: Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
 
-```{r accel_data pivot_long version.}
+```{r accel_data set up}
 accel_data = 
   read_csv("./data/accel_data.csv") %>%
   janitor::clean_names() %>%
@@ -29,9 +29,10 @@ accel_data =
   pivot_wider(names_from = minute_of_day, values_from = activity_count) %>% 
   select(week, day_id, day, day_type, total_activity_count, everything())
 ```
-*Description*: Without losing any of the originally observed variables and values, the resultant `accel_data` df contains 35 unique rows of observations
+**Description**: Without losing any of the originally observed variables and values, the resultant `accel_data` df contains 35 unique rows of observations. Each row represents a day (1-35 days). The final df has 1445 columns of variables: `week` consists of values from 1-5 depicting the respective week of observation, `day_id` and `day` identify the unique days of observation (all 7 days of a week * 5 weeks = 35 days = 35 rows), `day_type` indicates whether a given day is a weekend or a weekday, `total_activity_count` represents the sums across each minute's activity counts over a given day (sum of 1140 (24*60) values), and `activity_1` to `activity_1440` represent the activity counts across each minute. 
 
-*Task 2.2*: Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+
+**Task 2.2**: Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
 ```{r Total Activity - Table and Graph}
 total_activity_table = 
   accel_data %>% 
@@ -39,19 +40,26 @@ total_activity_table =
   summarize(total_activity_count) %>% 
   pivot_wider(names_from = day, values_from = total_activity_count)
 
+total_activity_table
+
 accel_data %>%
   ggplot(aes(x = day, y = total_activity_count, color = week, group = week)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  scale_colour_gradientn(colours = c("#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288")) +
+  ggtitle("Total Activity Count Vs. Day: Across 5 Weeks") +
+  xlab("Day") + ylab("Total Activity Count") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
-*Task 2.3*: Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
+**Task 2.3**: Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
 ```{r 24 Hour Plot}
 accel_data %>%
   pivot_longer(activity_1:activity_1440, names_to = "minute_of_day", 
                names_prefix = "activity_", values_to = "activity_count") %>% 
   ggplot(aes(x = minute_of_day, y = activity_count, color = day)) +
-  geom_point() 
+  geom_point(alpha = 0.5) +
+  theme(axis.text.x = element_blank())
 ```
 
 
