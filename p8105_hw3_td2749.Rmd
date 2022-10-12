@@ -56,8 +56,9 @@ accel_data %>%
   geom_point() +
   geom_line() +
   scale_colour_gradientn(colours = c("#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288")) +
-  ggtitle("Total Activity Count Vs. Day: Across 5 Weeks") +
-  xlab("Day") + ylab("Total Activity Count") +
+  labs(title = "Total Activity Count Vs. Day: Across 5 Weeks",
+       x = "Day",
+       y = "Total Activity Count") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 **Description**: From the table and graph generated above, here are some observed trends:
@@ -77,9 +78,18 @@ NOTE: I'm aware that `week` is in continual format (by virtue of being made up o
 accel_data %>%
   pivot_longer(activity_1:activity_1440, names_to = "minute_of_day", 
                names_prefix = "activity_", values_to = "activity_count") %>% 
+  mutate(minute_of_day = as.numeric(minute_of_day)) %>% 
   ggplot(aes(x = minute_of_day, y = activity_count, color = day)) +
   geom_point(alpha = 0.5) +
-  theme(axis.text.x = element_blank())
+  scale_x_continuous(
+    breaks = c(360, 720, 1080, 1440), 
+    labels = c("6 AM", "12 PM", "6 PM", "12 AM")) +
+  labs(title = "Activity Count Vs. Hour",
+       x = "Hour",
+       y = "Activity Count",
+       caption = "Composite: Monday through Sunday; across 5 weeks") +
+  theme(plot.title = element_text(hjust = 0.5),
+        plot.caption = element_text(hjust = 0.5))
 ```
 
 
