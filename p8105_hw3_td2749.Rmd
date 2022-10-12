@@ -10,6 +10,15 @@ library(tidyverse)
 library(ggplot2)
 ```
 
+```{r Setting up figure dimensions}
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+```
+
+
 ## Problem 2: Accelerometer Data
 
 **Task 2.1**: Load, tidy, and otherwise wrangle the data. Your final dataset should include all originally observed variables and values; have useful variable names; include a weekday vs weekend variable; and encode data with reasonable variable classes. Describe the resulting dataset (e.g. what variables exist, how many observations, etc).
@@ -51,6 +60,17 @@ accel_data %>%
   xlab("Day") + ylab("Total Activity Count") +
   theme(plot.title = element_text(hjust = 0.5))
 ```
+**Description**: From the table and graph generated above, here are some observed trends:
+
+* Compared to other weeks, activity is relatively more consistent throughout week 3.
+* Activity on Tuesday seems to be most consistent across all five weeks.
+* Generally upward trending activity between Tuesday and Thursday of weeks 1, 2, and 3.
+* Activity on Saturday of weeks 4 and 5 seems extremely low, even assuming lower than usual activity. This could be a result of the accelerometer not being worn on these days. 
+* Across all weeks, activity was greater on Wednesday than on Tuesday and on Friday than on Thursday (apart from week 4). 
+* Apart from week 4, Fridays seem to have consistently high total activities.
+
+NOTE: I'm aware that `week` is in continual format (by virtue of being made up of numeric values.) I tried converting it into character (to use it as a categorical variable) but that's not letting me plot this graph. I will learn of a way to rectify this situation! 
+
 
 **Task 2.3**: Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
 ```{r 24 Hour Plot}
