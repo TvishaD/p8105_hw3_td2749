@@ -10,13 +10,7 @@ library(tidyverse)
 library(ggplot2)
 ```
 
-```{r Setting up figure dimensions}
-knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = "90%"
-)
-```
+
 
 
 ## Problem 2: Accelerometer Data
@@ -59,7 +53,8 @@ accel_data %>%
   labs(title = "Total Activity Count Vs. Day: Across 5 Weeks",
        x = "Day",
        y = "Total Activity Count") +
-  theme(plot.title = element_text(hjust = 0.5))
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "bottom")
 ```
 **Description**: From the table and graph generated above, here are some observed trends:
 
@@ -89,7 +84,9 @@ accel_data %>%
        y = "Activity Count",
        caption = "Composite: Monday through Sunday; across 5 weeks") +
   theme(plot.title = element_text(hjust = 0.5),
-        plot.caption = element_text(hjust = 0.5))
+        plot.caption = element_text(hjust = 0.5),
+        legend.position = "bottom") +
+  viridis::scale_color_viridis(name = "week", discrete = TRUE)
 ```
 
 
