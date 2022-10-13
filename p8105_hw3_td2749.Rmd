@@ -161,11 +161,13 @@ ny_noaa_df %>%
   summarize(mean_monthly_tmax = mean(tmax_c, na.rm = TRUE)) %>% 
   mutate(
     month = as.character(month),
-    month = recode(month, "1" = "jan", "7" = "jul")) %>% 
+    month = recode(month, "1" = "January", "7" = "July")) %>% 
   drop_na(mean_monthly_tmax) %>% 
   ggplot(aes(x = year, y = mean_monthly_tmax, group = id, color = id)) + 
     geom_point(alpha = .1) +
     geom_line() + 
+    scale_x_continuous(
+      breaks = c(1980, 1985, 1990, 1995, 2000, 2005, 2010)) +
     facet_grid(. ~ month) +
     labs(title = "Average Monthly Maximum Temperature (Jan and July) Vs. Year",
        x = "Year",
@@ -173,8 +175,9 @@ ny_noaa_df %>%
        caption = "Composite: 1980 through 2010; across unique weather stations") +
     theme(
       legend.position = "none",
-      plot.title = element_text(hjust = 0.5),
-      plot.caption = element_text(hjust = 0.5))
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.caption = element_text(hjust = 0.5),
+      axis.title = element_text(face = "bold"))
 ```
 
 
