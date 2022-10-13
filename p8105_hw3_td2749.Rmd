@@ -49,20 +49,24 @@ total_activity_table =
   group_by(week, day) %>% 
   summarize(total_activity_count) %>% 
   pivot_wider(names_from = day, values_from = total_activity_count) %>% 
-  knitr::kable(caption = "Daily Total Activity: Across 5 weeks")
+  knitr::kable(caption = "Daily Total Activity (as observed counts): Across 5 weeks")
 
 total_activity_table
 
-accel_data %>%
-  ggplot(aes(x = day, y = total_activity_count, color = week, group = week)) +
-  geom_point() +
-  geom_line() +
-  scale_colour_gradientn(colours = c("#88CCEE", "#CC6677", "#DDCC77", "#117733", "#332288")) +
-  labs(title = "Total Activity Count Vs. Day: Across 5 Weeks",
+total_activity_plot = 
+  accel_data %>%
+    mutate(week = as.factor(week)) %>% 
+    ggplot(aes(x = day, y = total_activity_count, color = week, group = week)) +
+    geom_point() +
+    geom_line() +
+    labs(title = "Total Activity Count Vs. Day: Across 5 Weeks",
        x = "Day",
        y = "Total Activity Count") +
-  theme(plot.title = element_text(hjust = 0.5),
-        legend.position = "bottom")
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          axis.title = element_text(face = "bold"),
+          legend.position = "bottom")
+
+total_activity_plot
 ```
 _**Description**_: From the table and graph generated above, here are some observed trends:
 
@@ -73,29 +77,31 @@ _**Description**_: From the table and graph generated above, here are some obser
 * Across all weeks, activity was greater on Wednesday than on Tuesday and on Friday than on Thursday (apart from week 4). 
 * Apart from week 4, Fridays seem to have consistently high total activities.
 
-NOTE: I'm aware that `week` is in continual format (by virtue of being made up of numeric values.) I tried converting it into character (to use it as a categorical variable) but that's not letting me plot this graph. I will learn of a way to rectify this situation! 
-
 
 
 **Task 2.3**: Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
 ```{r 24 Hour Plot}
-accel_data %>%
-  pivot_longer(activity_1:activity_1440, names_to = "minute_of_day", 
-               names_prefix = "activity_", values_to = "activity_count") %>% 
-  mutate(minute_of_day = as.numeric(minute_of_day)) %>% 
-  ggplot(aes(x = minute_of_day, y = activity_count, color = day)) +
-  geom_point(alpha = 0.5) +
-  scale_x_continuous(
-    breaks = c(360, 720, 1080, 1440), 
-    labels = c("6 AM", "12 PM", "6 PM", "12 AM")) +
-  labs(title = "Activity Count Vs. Hour",
-       x = "Hour",
-       y = "Activity Count",
-       caption = "Composite: Monday through Sunday; across 5 weeks") +
-  theme(plot.title = element_text(hjust = 0.5),
-        plot.caption = element_text(hjust = 0.5),
-        legend.position = "bottom") +
-  viridis::scale_color_viridis(name = "week", discrete = TRUE)
+over_the_day_plot = 
+  accel_data %>%
+    pivot_longer(activity_1:activity_1440, names_to = "minute_of_day", 
+                 names_prefix = "activity_", values_to = "activity_count") %>% 
+    mutate(minute_of_day = as.numeric(minute_of_day)) %>% 
+    ggplot(aes(x = minute_of_day, y = activity_count, color = day)) +
+    geom_point(alpha = 0.5) +
+    scale_x_continuous(
+      breaks = c(360, 720, 1080, 1440), 
+      labels = c("6 AM", "12 PM", "6 PM", "12 AM")) +
+    labs(title = "Activity Count Vs. Hour",
+         x = "Hour",
+         y = "Activity Count",
+         caption = "Composite: Monday through Sunday; across 5 weeks") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          plot.caption = element_text(hjust = 0.5),
+          axis.title = element_text(face = "bold"),
+          legend.position = "bottom") +
+    viridis::scale_color_viridis(name = "week", discrete = TRUE)
+
+over_the_day_plot
 ```
 _**Description**_: From the plot above, some patterns/conclusions are:
 
@@ -105,7 +111,6 @@ _**Description**_: From the plot above, some patterns/conclusions are:
 * Highest activity on Mondays usually between 7-9 PM. 
 * Tuesdays are relatively the least active days for this individual. 
 * Some sparse high activity on Wednesday evenings (7-10 PM), other than which Wednesdays were pretty sedentary. 
-
 
 
 
@@ -160,32 +165,37 @@ For snowfall, the most commonly observed value is `r tail(names(sort(table(ny_no
 * It only snows during few months of the year (November end to March beginning), explaining the abundance of '0' readings across the other months. 
 * Even within those months, it might not be snowing everyday. As snowfall is measured to observe fresh-falling snow on a 24-hr basis, it is reasonable to infer that there may be certain non-snowing days during the winter months. 
 
+**Description of resultant `ny_noaa_df`**: ... ADD! 
+
 
 **Task 3.2**: Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
 ```{r ny_noaa avg.tmax jan and july}
-ny_noaa_df %>%
-  group_by(id, year, month) %>%
-  filter(month %in% c(1, 7)) %>% 
-  summarize(mean_monthly_tmax = mean(tmax_c, na.rm = TRUE)) %>% 
-  mutate(
-    month = as.character(month),
-    month = recode(month, "1" = "January", "7" = "July")) %>% 
-  drop_na(mean_monthly_tmax) %>% 
-  ggplot(aes(x = year, y = mean_monthly_tmax, group = id, color = id)) + 
-    geom_point(alpha = .1) +
-    geom_line(alpha = .3) + 
-    scale_x_continuous(
-      breaks = c(1980, 1985, 1990, 1995, 2000, 2005, 2010)) +
-    facet_grid(. ~ month) +
-    labs(title = "Average Monthly Maximum Temperature (Jan and July) Vs. Year",
-       x = "Year",
-       y = "Average Maximum Temperature (in °C)",
-       caption = "Composite: 1980 through 2010; across unique weather stations") +
-    theme(
-      legend.position = "none",
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.caption = element_text(hjust = 0.5),
-      axis.title = element_text(face = "bold"))
+avg_tmax_plot = 
+  ny_noaa_df %>%
+    group_by(id, year, month) %>%
+    filter(month %in% c(1, 7)) %>% 
+    summarize(mean_monthly_tmax = mean(tmax_c, na.rm = TRUE)) %>% 
+    mutate(
+      month = as.character(month),
+      month = recode(month, "1" = "January", "7" = "July")) %>% 
+    drop_na(mean_monthly_tmax) %>% 
+    ggplot(aes(x = year, y = mean_monthly_tmax, group = id, color = id)) + 
+      geom_point(alpha = .1) +
+      geom_line(alpha = .3) + 
+      scale_x_continuous(
+        breaks = c(1980, 1985, 1990, 1995, 2000, 2005, 2010)) +
+      facet_grid(. ~ month) +
+      labs(title = "Average Monthly Maximum Temperature (Jan and July) Vs. Year",
+         x = "Year",
+         y = "Average Maximum Temperature (in °C)",
+         caption = "Composite: 1980 through 2010; across unique weather stations") +
+      theme(
+        legend.position = "none",
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        plot.caption = element_text(hjust = 0.5),
+        axis.title = element_text(face = "bold"))
+
+avg_tmax_plot
 ```
 **Description**: ADD!
 ...
