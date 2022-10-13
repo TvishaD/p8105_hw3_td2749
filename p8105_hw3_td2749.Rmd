@@ -124,7 +124,7 @@ Note: There are no missing values in the `id` and `date` columns.
 
 
 **Task 3.1**: Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
-```{r}
+```{r relatively tidy ny_noaa_df}
 ny_noaa_df = 
   ny_noaa %>%
     janitor::clean_names() %>% 
@@ -149,12 +149,33 @@ ny_noaa_df =
 ```
 For snowfall, the most commonly observed value is `r tail(names(sort(table(ny_noaa_df$snow_inch))), 1)`inches. There could be several reasons for this occurrence: 
 
-* It only snows during few months of the year (November end to March beginning).
-* Even within those months, it might not be snowing everyday.
-* Some stations might 
+* It only snows during few months of the year (November end to March beginning), explaining the abundance of '0' readings across the other months. 
+* Even within those months, it might not be snowing everyday. As snowfall is measured to observe fresh-falling snow on a 24-hr basis, it is reasonable to infer that there may be certain non-snowing days during the winter months. 
 
 
 **Task 3.2**: Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
+```{r ny_noaa avg.tmax jan and july}
+ny_noaa_df %>%
+  group_by(id, year, month) %>%
+  filter(month %in% c(1, 7)) %>% 
+  summarize(mean_monthly_tmax = mean(tmax_c, na.rm = TRUE)) %>% 
+  mutate(
+    month = as.character(month),
+    month = recode(month, "1" = "jan", "7" = "jul")) %>% 
+  drop_na(mean_monthly_tmax) %>% 
+  ggplot(aes(x = year, y = mean_monthly_tmax, group = id, color = id)) + 
+    geom_point(alpha = .1) +
+    geom_line() + 
+    facet_grid(. ~ month) +
+    labs(title = "Average Monthly Maximum Temperature (Jan and July) Vs. Year",
+       x = "Year",
+       y = "Average Maximum Temperature (in °C)",
+       caption = "Composite: 1980 through 2010; across unique weather stations") +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(hjust = 0.5),
+      plot.caption = element_text(hjust = 0.5))
+```
 
 
 **Task 3.3**: Make a two-panel plot showing (i) tmax vs tmin for the full dataset (note that a scatterplot may not be the best option); and (ii) make a plot showing the distribution of snowfall values greater than 0 and less than 100 separately by year.
