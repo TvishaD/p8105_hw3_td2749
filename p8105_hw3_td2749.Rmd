@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 )
 ```
 
+
 ## Problem 2: Accelerometer Data
 
 
@@ -38,11 +39,13 @@ accel_data =
   pivot_wider(names_from = minute_of_day, values_from = activity_count) %>% 
   select(week, day_id, day, day_type, total_activity_count, everything())
 ```
+
 _**Description**_: Without losing any of the originally observed variables and values, the resultant `accel_data` df contains 35 unique rows of observations. Each row represents a day (1-35 days). The final df has 1445 columns of variables: `week` consists of values from 1-5 depicting the respective week of observation, `day_id` and `day` identify the unique days of observation (all 7 days of a week * 5 weeks = 35 days = 35 rows), `day_type` indicates whether a given day is a weekend or a weekday, `total_activity_count` represents the sums across each minute's activity counts over a given day (sum of 1140 (24*60) values), and `activity_1` to `activity_1440` represent the activity counts across each minute. 
 
 
 
 **Task 2.2**: Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each day, and create a table showing these totals. Are any trends apparent?
+
 ```{r Total Activity - Table and Graph}
 total_activity_table = 
   accel_data %>% 
@@ -68,7 +71,8 @@ total_activity_plot =
 
 total_activity_plot
 ```
-_**Description**_: From the table and graph generated above, here are some observed trends:
+
+_**Description:**_ From the table and graph generated above, here are some observed trends:
 
 * Compared to other weeks, activity is relatively more consistent throughout week 3.
 * Activity on Tuesday seems to be most consistent across all five weeks.
@@ -80,6 +84,7 @@ _**Description**_: From the table and graph generated above, here are some obser
 
 
 **Task 2.3**: Accelerometer data allows the inspection activity over the course of the day. Make a single-panel plot that shows the 24-hour activity time courses for each day and use color to indicate day of the week. Describe in words any patterns or conclusions you can make based on this graph.
+
 ```{r 24 Hour Plot}
 over_the_day_plot = 
   accel_data %>%
@@ -87,30 +92,30 @@ over_the_day_plot =
                  names_prefix = "activity_", values_to = "activity_count") %>% 
     mutate(minute_of_day = as.numeric(minute_of_day)) %>% 
     ggplot(aes(x = minute_of_day, y = activity_count, color = day)) +
-    geom_point(alpha = 0.5) +
-    scale_x_continuous(
-      breaks = c(360, 720, 1080, 1440), 
-      labels = c("6 AM", "12 PM", "6 PM", "12 AM")) +
-    labs(title = "Activity Count Vs. Hour",
-         x = "Hour",
-         y = "Activity Count",
-         caption = "Composite: Monday through Sunday; across 5 weeks") +
-    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-          plot.caption = element_text(hjust = 0.5),
-          axis.title = element_text(face = "bold"),
-          legend.position = "bottom") +
-    viridis::scale_color_viridis(name = "week", discrete = TRUE)
+      geom_point(alpha = 0.5) +
+      scale_x_continuous(
+        breaks = c(360, 720, 1080, 1440), 
+        labels = c("6 AM", "12 PM", "6 PM", "12 AM")) +
+      labs(title = "Activity Count Vs. Hour",
+           x = "Hour",
+           y = "Activity Count",
+           caption = "Composite: Monday through Sunday; across 5 weeks") +
+      theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+            plot.caption = element_text(hjust = 0.5),
+            axis.title = element_text(face = "bold"),
+            legend.position = "bottom") +
+      viridis::scale_color_viridis(name = "week", discrete = TRUE)
 
 over_the_day_plot
 ```
 _**Description**_: From the plot above, some patterns/conclusions are:
 
-* Sunday morning and Friday evenings generally reveal clusters of activity. 
-* Thursday mornings around 7 AM. Consistent activity pattern?
-* Saturdays (around 5 PM and 8 PM)
-* Highest activity on Mondays usually between 7-9 PM. 
+* Sunday mornings-afternoons (11:00 AM - 1:00 PM) and Friday evenings (9:00 PM) reveal most apparent clusters of activity. 
+* Thursday mornings around 7 AM reveals a consistent activity pattern, indicating a possible repeating exercise routine? 
+* Clusters of activity on Saturdays (around 5 PM and 8 PM)
+* The highest occurring activity on Mondays is usually between 7-9 PM. 
 * Tuesdays are relatively the least active days for this individual. 
-* Some sparse high activity on Wednesday evenings (7-10 PM), other than which Wednesdays were pretty sedentary. 
+* Some sparse high activity on Wednesday evenings (7-10 PM), other than which Wednesdays seem pretty sedentary. 
 
 
 
@@ -137,6 +142,7 @@ Note: There are no missing values in the `id` and `date` columns.
 
 
 **Task 3.1**: Do some data cleaning. Create separate variables for year, month, and day. Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+
 ```{r relatively tidy ny_noaa_df}
 ny_noaa_df = 
   ny_noaa %>%
@@ -147,7 +153,7 @@ ny_noaa_df =
       year = as.numeric(year),
       month = as.numeric(month),
       day = as.numeric(day),
-      tmax, tmax = as.numeric(tmax),
+      tmax = as.numeric(tmax),
       tmin = as.numeric(tmin),
       tmax = tmax/10,
       tmin = tmin/10,
@@ -160,12 +166,13 @@ ny_noaa_df =
       tmax_c = tmax, 
       tmin_c = tmin)
 ```
-For snowfall, the most commonly observed value is `r tail(names(sort(table(ny_noaa_df$snow_inch))), 1)`inches. There could be several reasons for this occurrence: 
+
+For snowfall, the most commonly observed value is `r tail(names(sort(table(ny_noaa_df$snow_inch))), 1)` inches. There could be several reasons for this occurrence: 
 
 * It only snows during few months of the year (November end to March beginning), explaining the abundance of '0' readings across the other months. 
 * Even within those months, it might not be snowing everyday. As snowfall is measured to observe fresh-falling snow on a 24-hr basis, it is reasonable to infer that there may be certain non-snowing days during the winter months. 
 
-**Description of resultant `ny_noaa_df`**: ... ADD! 
+_**Description of resultant `ny_noaa_df`**_: The resultant `ny_noaa_df` consists of all the rows as observed in `ny_noaa` (i.e 2595176). Instead of 7 columns, there are now 9 columns of variables, as date has been split into 3 different columns (`year`, `month`, and `day`). These resultant columns contain data in the numeric format. Values in the `tmax` and `tmin` columns have been numerically manipulated via division by 10, resulting in normal Celcius unit observations. These columns were then renamed as `tmax_c` and `tmin_c` respectively. Values in the `snow` column were divided by 25.4 to present the observations in inches (as the snowfall is usually reported in inches and not in millimeters). The resultant column was renamed as `snow_inch`. The `snwd` snow depth column was renamed as `snwd_mm` to reflect the unit of measurement (millimeters).
 
 
 **Task 3.2**: Make a two-panel plot showing the average max temperature in January and in July in each station across years. Is there any observable / interpretable structure? Any outliers?
@@ -197,15 +204,8 @@ avg_tmax_plot =
 
 avg_tmax_plot
 ```
-**Description**: ADD!
-...
-...
-...
-...
-...
-...
-...
-...
+
+_**Description**_: It is extremely fascinating how the max temperature patterns in both January and July reveal a clear oscillation 
 
 
 
