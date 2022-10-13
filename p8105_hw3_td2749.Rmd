@@ -8,6 +8,8 @@ output: github_document
 ```{r Setting up, message = FALSE}
 library(tidyverse)
 library(ggplot2)
+library(ggridges)
+library(patchwork)
 ```
 
 ## Problem 2: Accelerometer Data
@@ -199,7 +201,30 @@ tmax_vs_tmin =
       plot.caption = element_text(hjust = 0.5),
       axis.title = element_text(face = "bold"))
 
+snow_fall_dist = 
+  ny_noaa_df %>% 
+    mutate(snow_inch = snow_inch * 25.4) %>% 
+    rename(snow = snow_inch) %>%
+  filter(snow > 0 & snow < 100) %>% 
+  group_by(year, snow) %>% 
+  summarise(year, snow) %>% 
+    ggplot(aes(x = snow, y = year, group = year)) +
+    geom_density_ridges(scale = .85) +
+    scale_x_continuous(
+      breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+    scale_y_continuous(
+      breaks = c(1980, 1985, 1990, 1995, 2000, 2005, 2010)) +
+    labs(title = "Snowfall Distribution by Year",
+       x = "Snowfall (in millimeters (mm))",
+       y = "Year",
+       caption = "Distribution of snowfall values between 0 and 100 separately by year") +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.caption = element_text(hjust = 0.5),
+      axis.title = element_text(face = "bold"))
 
+(tmax_vs_tmin + snow_fall_dist)
 ```
 
 
