@@ -94,8 +94,8 @@ over_the_day_plot =
     ggplot(aes(x = minute_of_day, y = activity_count, color = day)) +
       geom_point(alpha = 0.5) +
       scale_x_continuous(
-        breaks = c(360, 720, 1080, 1440), 
-        labels = c("6 AM", "12 PM", "6 PM", "12 AM")) +
+        breaks = c(0, 360, 720, 1080, 1440), 
+        labels = c("12 AM","6 AM", "12 PM", "6 PM", "11:59 PM")) +
       labs(title = "Activity Count Vs. Hour",
            x = "Hour",
            y = "Activity Count",
@@ -134,9 +134,9 @@ _**Description**_: The original `ny_noaa` dataset consists of `r nrow(ny_noaa)` 
 Upon brief inspection of the dataset, it can be concluded that there is quite a lot of missing data. There are some rows where all weather recordings are missing, and some where there are certain combinations missing. An initial broad assumption for this could be that the missing values could reflect: 
 
 a) No rain/snow/snowdepth to measure at a specific location on a certain day. (Weather conditions/seasonal shifts)
-b) No temperature and/or snow fall readings at certain weather stations
+b) No temperature and/or snow fall readings taken at certain weather stations
 
-As conditions about the availability of data are not explicit, it is not clear whether the rows with NA values should be completely discarded or imputed with some other values. This might change based on the needs of the questions being answered. If there is a lot of missing data that would otherwise be required to answer a specific/relevant question, this dataset would be considered less effective.
+As conditions about the availability of data are not explicit, it is not clear whether the rows with NA values should be completely discarded or imputed with some other values. This might change based on the needs of the questions being answered. If there is a lot of missing data that would otherwise be required to answer a specific/relevant question, this dataset would be considered less effective and the issue of the missing data would be more pertinent.
 
 Note: There are no missing values in the `id` and `date` columns. 
 
@@ -172,6 +172,8 @@ For snowfall, the most commonly observed value is `r tail(names(sort(table(ny_no
 * It only snows during few months of the year (November end to March beginning), explaining the abundance of '0' readings across the other months. 
 * Even within those months, it might not be snowing everyday. As snowfall is measured to observe fresh-falling snow on a 24-hr basis, it is reasonable to infer that there may be certain non-snowing days during the winter months. 
 
+The next common occurrences are "0.984251968503937", "0.511811023622047", "2.00787401574803", and "2.99212598425197" (ALL IN INCHES).
+
 _**Description of resultant `ny_noaa_df`**_: The resultant `ny_noaa_df` consists of all the rows as observed in `ny_noaa` (i.e 2595176). Instead of 7 columns, there are now 9 columns of variables, as date has been split into 3 different columns (`year`, `month`, and `day`). These resultant columns contain data in the numeric format. Values in the `tmax` and `tmin` columns have been numerically manipulated via division by 10, resulting in normal Celcius unit observations. These columns were then renamed as `tmax_c` and `tmin_c` respectively. Values in the `snow` column were divided by 25.4 to present the observations in inches (as the snowfall is usually reported in inches and not in millimeters). The resultant column was renamed as `snow_inch`. The `snwd` snow depth column was renamed as `snwd_mm` to reflect the unit of measurement (millimeters).
 
 
@@ -205,7 +207,10 @@ avg_tmax_plot =
 avg_tmax_plot
 ```
 
-_**Description**_: It is extremely fascinating how the max temperature patterns in both January and July reveal a clear oscillation 
+_**Description**_: It is extremely fascinating how the max temperature patterns in both January and July reveal oscillatory structures. Here are some trends:
+
+* The average maximum temperature is higher in July (~25-27°C) than in January (~-1-1°C).
+* For both Jan and July, rises and falls in average maximum temperature over the years seem to be following a somewhat predictable pattern that seems to be roughly repeating every 5 years. 
 
 
 
